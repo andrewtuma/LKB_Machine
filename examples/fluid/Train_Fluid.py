@@ -66,7 +66,9 @@ hyp_params['pretrain'] = False
 hyp_params['optimizer'] = 'adam'
 hyp_params['batch_size'] = 256
 hyp_params['phys_dim'] = 3
-hyp_params['latent_dim'] = 3
+hyp_params['num_cmplx_prs'] = 1
+hyp_params['num_real'] = 1
+hyp_params['latent_dim'] = 2*hyp_params['num_cmplx_prs'] + hyp_params['num_real']
 hyp_params['hidden_activation'] = tf.keras.activations.relu
 hyp_params['bias_initializer'] = tf.keras.initializers.Zeros
 
@@ -76,6 +78,12 @@ hyp_params['num_en_neurons'] = 64
 hyp_params['kernel_init_enc'] = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.1)
 hyp_params['kernel_init_dec'] = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.1)
 hyp_params['ae_output_activation'] = tf.keras.activations.linear
+
+# Auxiliary Layer Parameters
+hyp_params['num_k_layers'] = 2
+hyp_params['num_k_neurons'] = 32
+hyp_params['kernel_init_aux'] = tf.keras.initializers.TruncatedNormal(mean=0.0, stddev=0.1)
+hyp_params['aux_output_activation'] = tf.keras.activations.linear
 
 # Loss Function Parameters
 hyp_params['a1'] = tf.constant(1, dtype=hyp_params['precision'])  # Reconstruction
