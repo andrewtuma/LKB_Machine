@@ -1,2 +1,2 @@
-# DLDMD
-Deep learning assisted dynamic mode decomposition
+# LKBMachine
+Deep learning assisted Koopman analysis
