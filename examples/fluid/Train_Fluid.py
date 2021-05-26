@@ -7,6 +7,8 @@ import pickle
 import datetime as dt
 import os
 
+import sys
+sys.path.insert(0, '../../')
 import LKBMachine as dl
 import LossLKB as lf
 import Data as dat
@@ -53,21 +55,22 @@ hyp_params['precision'] = tf.keras.backend.floatx()
 hyp_params['num_init_conds'] = 20000
 hyp_params['num_train_init_conds'] = 15000
 hyp_params['num_test_init_conds'] = 5000
-hyp_params['time_final'] = 6
+hyp_params['time_final'] = 2
 hyp_params['delta_t'] = 0.01
 hyp_params['num_time_steps'] = int(hyp_params['time_final'] / hyp_params['delta_t'] + 1)
 hyp_params['num_pred_steps'] = hyp_params['num_time_steps']
 hyp_params['max_epochs'] = 100
 hyp_params['save_every'] = hyp_params['max_epochs'] // NUM_SAVES
 hyp_params['plot_every'] = hyp_params['max_epochs'] // NUM_PLOTS
-hyp_params['pretrain'] = False
+hyp_params['pretrain'] = True
+hyp_params['num_pretrain'] = 10
 
 # Universal network layer parameters (AE & Aux)
 hyp_params['optimizer'] = 'adam'
-hyp_params['batch_size'] = 256
+hyp_params['batch_size'] = 64
 hyp_params['phys_dim'] = 3
 hyp_params['num_cmplx_prs'] = 1
-hyp_params['num_real'] = 1
+hyp_params['num_real'] = 0
 hyp_params['latent_dim'] = 2*hyp_params['num_cmplx_prs'] + hyp_params['num_real']
 hyp_params['hidden_activation'] = tf.keras.activations.relu
 hyp_params['bias_initializer'] = tf.keras.initializers.Zeros
@@ -93,7 +96,7 @@ hyp_params['a4'] = tf.constant(1e-12, dtype=hyp_params['precision'])  # L-inf
 hyp_params['a5'] = tf.constant(1e-13, dtype=hyp_params['precision'])  # L-2 on weights
 
 # Learning rate
-hyp_params['lr'] = 1e-3  # Learning rate
+hyp_params['lr'] = 1e-3
 
 # Initialize the Koopman model and loss
 myMachine = dl.LKBMachine(hyp_params)
@@ -109,10 +112,10 @@ if os.path.exists(data_fname):
     data = pickle.load(open(data_fname, 'rb'))
     data = tf.cast(data, dtype=hyp_params['precision'])
 else:
-    import numpy as np
-    data = dat.data_maker_fluid_flow_slow(r_lower=0, r_upper=1.1, t_lower=0, t_upper=2*np.pi,
-                    n_ic=hyp_params['num_init_conds'], dt=hyp_params['delta_t'],
-                    tf=hyp_params['time_final'])
+    data = dat.data_maker_fluid_flow_full(x1_lower=-1.1, x1_upper=1.1, x2_lower=-1.1, x2_upper=1.1,
+                                          x3_lower=0.0, x3_upper=2.43,
+                                          n_ic=hyp_params['num_init_conds'], dt=hyp_params['delta_t'],
+                                          tf=hyp_params['time_final'])
     data = tf.cast(data, dtype=hyp_params['precision'])
     # Save data to file
     pickle.dump(data, open(data_fname, 'wb'))

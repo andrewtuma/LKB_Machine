@@ -13,6 +13,8 @@ import HelperFuns as hf
 
 
 def train_model(hyp_params, train_data, val_set, model, loss):
+    pretrain = hyp_params['pretrain']
+
     # Dictionary to store all relevant training parameters and losses
     train_params = dict()
     train_params['start_time'] = time.time()
@@ -38,7 +40,7 @@ def train_model(hyp_params, train_data, val_set, model, loss):
             myoptimizer = tf.keras.optimizers.SGD(learning_rate=hyp_params['lr'], momentum=0.9)
 
         # Pretraining the autoencoder
-        if hyp_params['pretrain'] and epoch < hyp_params['num_pretrain']:
+        if pretrain and epoch < hyp_params['num_pretrain']:
             print("pretraining...")
             loss.a1 = tf.constant(1.0, dtype=hyp_params['precision'])  # AE
             loss.a2 = tf.constant(0.0, dtype=hyp_params['precision'])  # X predictions
@@ -46,7 +48,7 @@ def train_model(hyp_params, train_data, val_set, model, loss):
             loss.a4 = tf.constant(0.0, dtype=hyp_params['precision'])  # max norm on x_adv/x_ae
             loss.a5 = tf.constant(1e-6, dtype=hyp_params['precision'])  # W regularization
         else:
-            model.pretrain = False
+            pretrain = False
             loss.pretrain = False
             loss.a1 = hyp_params['a1']  # AE
             loss.a2 = hyp_params['a2']  # X predictions
@@ -94,7 +96,7 @@ def train_model(hyp_params, train_data, val_set, model, loss):
                       time=time.time() - epoch_time))
 
         # Save training diagnostic plots
-        if not model.pretrain:
+        if not pretrain:
             if epoch == 1 or epoch % hyp_params['plot_every'] == 0:
                 if not os.path.exists(hyp_params['plot_path']):
                     os.makedirs(hyp_params['plot_path'])

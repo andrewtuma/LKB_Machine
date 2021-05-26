@@ -39,23 +39,25 @@ print("Training at precision: {}".format(tf.keras.backend.floatx()))
 print("Training on device: {}".format(DEVICE))
 
 
+
 # ==============================================================================
-# Initialize hyper-parameters and model
+# Initialize hyper-parameters and Koopman model
 # ==============================================================================
 # General parameters
 hyp_params = dict()
 hyp_params['sim_start'] = dt.datetime.now().strftime("%Y-%m-%d-%H%M")
-hyp_params['experiment'] = 'pendulum'
+hyp_params['experiment'] = 'duffing'
 hyp_params['plot_path'] = './training_results/' + hyp_params['experiment'] + '_' + hyp_params['sim_start']
 hyp_params['model_path'] = './trained_models/' + hyp_params['experiment'] + '_' + hyp_params['sim_start']
 hyp_params['device'] = DEVICE
 hyp_params['precision'] = tf.keras.backend.floatx()
-hyp_params['num_init_conds'] = 10000
-hyp_params['num_train_init_conds'] = 8000
-hyp_params['num_val_init_conds'] = 2000
-hyp_params['time_final'] = 1
-hyp_params['delta_t'] = 0.02
-hyp_params['num_time_steps'] = int(hyp_params['time_final']/hyp_params['delta_t'] + 1)
+hyp_params['num_init_conds'] = 15000
+hyp_params['num_train_init_conds'] = 10000
+hyp_params['num_val_init_conds'] = 3000
+hyp_params['num_test_init_conds'] = 2000
+hyp_params['time_final'] = 50
+hyp_params['delta_t'] = 0.1
+hyp_params['num_time_steps'] = int(hyp_params['time_final']/hyp_params['delta_t'])
 hyp_params['num_pred_steps'] = hyp_params['num_time_steps']
 hyp_params['max_epochs'] = 100
 hyp_params['save_every'] = hyp_params['max_epochs'] // NUM_SAVES
@@ -87,11 +89,11 @@ hyp_params['kernel_init_aux'] = tf.keras.initializers.TruncatedNormal(mean=0.0, 
 hyp_params['aux_output_activation'] = tf.keras.activations.linear
 
 # Loss Function Parameters
-hyp_params['a1'] = tf.constant(1, dtype=hyp_params['precision'])  # Reconstruction
-hyp_params['a2'] = tf.constant(1, dtype=hyp_params['precision'])  # Prediction
-hyp_params['a3'] = tf.constant(1, dtype=hyp_params['precision'])  # Linearity
-hyp_params['a4'] = tf.constant(1e-9, dtype=hyp_params['precision'])  # L-inf
-hyp_params['a5'] = tf.constant(1e-14, dtype=hyp_params['precision'])  # L-2 on weights
+hyp_params['a1'] = tf.constant(1, dtype=hyp_params['precision'])        # Reconstruction
+hyp_params['a2'] = tf.constant(1, dtype=hyp_params['precision'])        # Prediction
+hyp_params['a3'] = tf.constant(1, dtype=hyp_params['precision'])        # Linearity
+hyp_params['a4'] = tf.constant(1e-9, dtype=hyp_params['precision'])     # L-inf
+hyp_params['a5'] = tf.constant(1e-14, dtype=hyp_params['precision'])    # L-2 on weights
 
 # Learning rate
 hyp_params['lr'] = 1e-3
@@ -104,17 +106,17 @@ myLoss = lf.LossLKB(hyp_params)
 # ==============================================================================
 # Generate / load data
 # ==============================================================================
-data_fname = 'pendulum_data.pkl'
+data_fname = 'duffing_data.pkl'
 if os.path.exists(data_fname):
     # Load data from file
     data = pickle.load(open(data_fname, 'rb'))
     data = tf.cast(data, dtype=hyp_params['precision'])
 else:
     # Create new data
-    data = dat.data_maker_pendulum(x_lower1=-3.1, x_upper1=3.1, x_lower2=-2, x_upper2=2,
-                                   n_ic=hyp_params['num_init_conds'], dt=hyp_params['delta_t'],
-                                   tf=hyp_params['time_final'])
-    data = tf.cast(data, dtype=hyp_params['precision'])
+    data = dat.data_maker_duffing(x_lower1=-1, x_upper1=1, x_lower2=-1, x_upper2=1,
+                                  n_ic=hyp_params['num_init_conds'], dt=hyp_params['delta_t'],
+                                  tf=hyp_params['time_final'])
+    data = tf.cast(data[:, :, :2], dtype=hyp_params['precision'])
     # Save data to file
     pickle.dump(data, open(data_fname, 'wb'))
 
@@ -133,6 +135,4 @@ val_set = val_set.prefetch(tf.data.AUTOTUNE)
 # ==============================================================================
 results = tr.train_model(hyp_params=hyp_params, train_data=train_data,
                          val_set=val_set, model=myMachine, loss=myLoss)
-
 print(results['model'].summary())
-exit()

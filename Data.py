@@ -1,9 +1,9 @@
 """
     Created by:
-        Opal Issan
+        Opal Issan, SDSU
 
     Modified:
-        17 Nov 2020 - Jay Lago
+        Jay Lago, SDSU, 17 Nov 2020
 """
 import numpy as np
 
@@ -274,9 +274,9 @@ def data_maker_kdv(x_lower1, x_upper1, x_lower2, x_upper2, n_ic=10000, dt=0.01, 
         data_mat[ii, :, 0] = np.array([icond1[ii], icond2[ii]], dtype=np.float64)
         for jj in range(nsteps):
             data_mat[ii, :, jj+1] = rk4(data_mat[ii, :, jj], dt, dyn_sys_kdv)
-            if (data_mat[ii, 0, jj+1] < x_lower1 or data_mat[ii, 1, jj+1] > x_upper1
-                    or data_mat[ii, 1, jj+1] < x_lower2 or data_mat[ii, 1, jj+1] > x_upper2):
-                break
+            # if (data_mat[ii, 0, jj+1] < x_lower1 or data_mat[ii, 1, jj+1] > x_upper1
+            #         or data_mat[ii, 1, jj+1] < x_lower2 or data_mat[ii, 1, jj+1] > x_upper2):
+            #     break
     return np.transpose(data_mat, [0, 2, 1])
 
 def data_maker_duffing(x_lower1, x_upper1, x_lower2, x_upper2, n_ic=10000, dt=0.01, tf=1.0, seed=None):

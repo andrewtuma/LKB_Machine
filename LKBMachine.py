@@ -12,10 +12,8 @@ class LKBMachine(keras.Model):
         super(LKBMachine, self).__init__(**kwargs)
 
         # Parameters
-        self.batch_size = hyp_params['batch_size']
         self.phys_dim = hyp_params['phys_dim']
         self.latent_dim = hyp_params['latent_dim']
-        self.num_time_steps = 1  # int(hyp_params['num_time_steps'])
         self.num_pred_steps = hyp_params['num_pred_steps']
         self.num_en_layers = hyp_params['num_en_layers']
         self.num_k_layers = hyp_params['num_k_layers']
@@ -29,9 +27,8 @@ class LKBMachine(keras.Model):
         self.dec_input = (1, self.latent_dim)
         self.real_input = (1, self.num_real)
         self.cmplx_input = (1, self.num_cmplx)
-        self.pretrain = hyp_params['pretrain']
 
-        # Construct the ENCODER network batch_size=self.batch_size
+        # Construct the ENCODER network
         self.encoder = keras.Sequential()
         self.encoder.add(Conv1D(filters=hyp_params['num_en_neurons'], kernel_size=self.kernel_size,
                                 input_shape=self.enc_input,
@@ -203,8 +200,8 @@ class LKBMachine(keras.Model):
         prior = y0
         tmp = tmp.write(0, prior)
         for tstep in tf.range(1, self.num_pred_steps):
-            y_cmplx = prior[:, :, :self.num_real:]
-            y_real = prior[:, :, self.num_real:]
+            y_real = prior[:, :, :self.num_real]
+            y_cmplx = prior[:, :, self.num_real:]
 
             # Real eigenvalues
             evals = self.auxnet_real(y_real)
