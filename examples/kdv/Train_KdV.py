@@ -20,7 +20,7 @@ import Training as tr
 # ==============================================================================
 NUM_SAVES = 1       # Number of times to save the model throughout training
 NUM_PLOTS = 20      # Number of diagnostic plots to generate while training
-DEVICE = '/GPU:1'
+DEVICE = '/GPU:0'
 GPUS = tf.config.experimental.list_physical_devices('GPU')
 if GPUS:
     try:
@@ -138,8 +138,8 @@ print(results['model'].summary())
 exit()
 
 
-import matplotlib.pyplot as plt
-plt.figure(1, figsize=(10, 10))
-for ii in range(0, data.shape[0], 10):
-    plt.plot(data[ii, :, 0], data[ii, :, 1], 'r-', lw=0.25)
-plt.show()
+# import matplotlib.pyplot as plt
+# plt.figure(1, figsize=(10, 10))
+# for ii in range(0, data.shape[0], 10):
+#     plt.plot(data[ii, :, 0], data[ii, :, 1], 'r-', lw=0.25)
+# plt.show()
